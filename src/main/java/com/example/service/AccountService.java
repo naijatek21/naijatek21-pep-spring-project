@@ -14,13 +14,15 @@ public class AccountService {
     }
 
     public Account newUser(String username, String password){
-        return null;
-
+        Account user  = new Account(username, password);
+        accountRepository.save(user);
+        return user;
     }
 
 
     public Account loginAccount(String username, String password){
-        return null;
+        Account a = accountRepository.findByUsernameAndPassword(username, password);
+        return a;
     }
 
     public Account getUserbyId(int userId){

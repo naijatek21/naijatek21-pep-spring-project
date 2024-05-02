@@ -16,8 +16,6 @@ public class MessageService {
         this.messageRepository = messageRepository;
     }
 
-
-    
     public List<Message> getAllMessages() {
         return (List<Message>) messageRepository.findAll();
     }
@@ -43,7 +41,7 @@ public class MessageService {
     }
 
     public List<Message> getAllMessagesbyUser(int userId) {
-        return null;
+        return messageRepository.findAllByPostedby(userId);
     }
 
 
