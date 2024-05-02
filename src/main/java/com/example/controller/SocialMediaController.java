@@ -1,12 +1,26 @@
 package com.example.controller;
 
+import java.util.List;
+
+import javax.persistence.EntityNotFoundException;
+
+import org.h2.util.IntArray;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.example.entity.Account;
+import com.example.entity.Message;
+import com.example.service.AccountService;
+import com.example.service.MessageService;
+
+import javafx.beans.binding.IntegerBinding;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller using Spring. The endpoints you will need can be
@@ -16,132 +30,112 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class SocialMediaController {
+    private AccountService accountService;
+    private MessageService messageService;
 
     @PostMapping("/register")
-    public  @ResponseBody String addNewUser(){return null;}
+    public @ResponseBody ResponseEntity<Account> addNewUser(@RequestParam String username,@RequestParam String password){
+        if(username.length() !=0 || password.length() >= 4){
+            try{
+                Account attempt = accountService.getUserbyUsername(username);
+                return ResponseEntity.status(409).body(null);
+
+            }catch(Exception e){
+                Account newAccount = accountService.newUser(username,password);
+                return ResponseEntity.status(200).body(newAccount);
+            }
+        }
+        else{
+            return ResponseEntity.status(400).body(null);
+        }
+    }
 
     @PostMapping("/login")
-    public  @ResponseBody String logger(){return null;}
+    public  @ResponseBody ResponseEntity<Account> logger(@RequestParam String username,@RequestParam String password){
+        
+        try{
+            Account attempt = accountService.loginAccount(username,password);
+            return ResponseEntity.status(200).body(attempt);
+        }
+        catch (EntityNotFoundException e) {
+            // TODO: handle exception
+            return ResponseEntity.status(401).body(null);
+        }
+        
+
+
+    }
 
     @PostMapping("messages")
-    public  @ResponseBody String messageGenerator(){return null;}
+    public  @ResponseBody ResponseEntity<Message> messageGenerator(@RequestParam int postedBy, @RequestParam String messageText,  @RequestParam long timePostedEpoch){
+        try{
+            Account poster = accountService.getUserbyId(postedBy);
+            if(messageText.length()>0 && messageText.length() <= 255){
+                Message msg = new Message(postedBy,messageText,timePostedEpoch);
+                messageService.addMessage(msg);
+                return ResponseEntity.status(200).body(msg);
+            }
+            else{
+                return ResponseEntity.status(400).body(null);
+            }
+        }
+        catch(EntityNotFoundException e){
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+
 
     @GetMapping("/messages")
-    public  @ResponseBody String messageFeed(){return null;}
+    public  @ResponseBody ResponseEntity<List<Message>> messageFeed(){
+        List<Message> msgs = messageService.getAllMessages();
+        return ResponseEntity.status(200).body(msgs);
+    }
 
     @GetMapping("/messages/{message_id}")
-    public @ResponseBody String messageRetrieve(@PathVariable int message_id){return null;}
+    public @ResponseBody ResponseEntity<Message> messageRetrieve(@PathVariable int message_id){
+        try{
+            Message m = messageService.getMessage(message_id);
+            return ResponseEntity.status(200).body(m);
+        }
+        catch(Exception e){
+            return ResponseEntity.status(200).body(null);
+        }
+    }
 
     @DeleteMapping("/messages/{message_id}")
-    public  @ResponseBody String messageDelete(@PathVariable int message_id){return null;}
+    public  @ResponseBody ResponseEntity<Integer> messageDelete(@PathVariable int message_id){
+        try{
+            Message m = messageService.getMessage(message_id);
+            messageService.deleteMessage(message_id);
+            return ResponseEntity.status(200).body(1);
+        }
+        catch(Exception e){
+            return ResponseEntity.status(200).body(null);
+        }
+    }
 
     @PatchMapping("/messages/{message_id}")
-    public @ResponseBody String messageUpdate(@PathVariable int message_id){return null;}
+    public @ResponseBody ResponseEntity<Integer> messageUpdate(@PathVariable int message_id,@RequestParam String newMessageText ){
+        if(newMessageText.length() >0 && newMessageText.length() <= 255){
+            try{
+                Message m = messageService.updateMessage(message_id, newMessageText);
+                return ResponseEntity.status(200).body(1);
+            }catch(Exception e){
+                return ResponseEntity.status(400).body(null);
+            }
+        }
+        else{
+            return ResponseEntity.status(400).body(null);
+        }
+
+    
+    }
 
     @GetMapping("/accounts/{account_id}")
-    public @ResponseBody String userFeed(@PathVariable int account_id){return null;}
+    public @ResponseBody ResponseEntity<List<Message>> userFeed(@PathVariable int account_id){
+        List<Message> msgs = messageService.getAllMessagesbyUser(account_id);
+        return ResponseEntity.status(200).body(msgs);
+    }
 }
 
-// public Javalin startAPI() {
-//     Javalin app = Javalin.create();
-//     app.post("/register",this::addNewUser);
-//     app.post("/login",this::logger);
-//     app.post("/messages",this::messageGenerator);
-//     app.get("/messages",this::messageFeed);
-//     app.get("/messages/{message_id}",this::messageRetrieve);
-//     app.delete("/messages/{message_id}",this::messageDelete);
-//     app.patch("/messages/{message_id}",this::messageUpdate);
-//     app.get("/accounts/{account_id}",this::UserFeed);
-//     return app;
-// }
 
-// /**
-//  * This is an example handler for an example endpoint.
-//  * @param context The Javalin Context object manages information about both the HTTP request and response.
-//  */
-// private void addNewUser(Context ctx)  throws JsonProcessingException {
-//     ObjectMapper mapper = new ObjectMapper();
-//     Account account = mapper.readValue(ctx.body(), Account.class);
-//     List <Account> accounts = socialMediaService.getAllAccounts();
-//     for(Account accnt : accounts){
-//         if(accnt.getPassword() ==account.getPassword() && account.getUsername() == accnt.getUsername()){
-//             ctx.status(400);
-//         }
-//     }
-//     if(account.getUsername().length()>0 && account.getPassword().length()>4){
-//         Account addedAccount = socialMediaService.addUser(account);
-//         ctx.json(addedAccount, Account.class);
-//         ctx.status(200);
-//     }
-//     ctx.status(400);
-// }
-// private void logger(Context ctx)  throws JsonProcessingException{
-//     ObjectMapper mapper = new ObjectMapper();
-//     Account account = mapper.readValue(ctx.body(), Account.class);
-//     Account res = socialMediaService.accountVerify(account.getUsername(), account.getPassword());
-//     if( res != null){
-//         ctx.json(res, Account.class);
-//         ctx.status(200);
-//     }
-//     ctx.status(401);
-
-// }
-
-// private void messageGenerator(Context ctx)  throws JsonProcessingException{
-//     ObjectMapper mapper = new ObjectMapper();
-//     Message msg = mapper.readValue(ctx.body(), Message.class);
-//     String txt = msg.getMessage_text();
-//     int user = msg.getPosted_by();
-//     Account a = socialMediaService.getUser(user);
-//     if(txt.length()==0 || txt.length()> 255 || a == null)
-//         ctx.status(400);
-        
-//     Message newMessage = socialMediaService.addMessage(msg);
-//         ctx.json(newMessage);
-//         ctx.status(200);
-
-// }
-
-// private void messageFeed(Context ctx) throws JsonProcessingException{
-//     List<Message> messages = socialMediaService.getAllMessages();
-//     ctx.json(messages);
-//     ctx.status(200);
-
-// }
-
-// private void messageRetrieve(Context ctx){
-//     int id =Integer.parseInt(ctx.pathParam("message_id"));
-//         Message message = socialMediaService.getMessage(id);
-//         if(message !=null)
-//             ctx.json(message);
-//         ctx.status(200);
-// }
-
-// private void messageDelete(Context ctx){
-//     int id = Integer.parseInt(ctx.pathParam("message_id"));
-//         Message message = socialMediaService.deleteMessage(id);
-//         if(message != null)
-//             ctx.json(message);
-//         ctx.status(200);
-// }
-
-// private void messageUpdate(Context ctx) throws JsonProcessingException{
-//     ObjectMapper mapper = new ObjectMapper();
-//     int id = Integer.parseInt(ctx.pathParam("message_id"));
-//     Message msg = mapper.readValue(ctx.body(), Message.class);
-//     if( msg.getMessage_id() == 0 || msg.getMessage_text().length() == 0 || msg.getMessage_text().length()>255){
-//         ctx.status(400);
-//     }
-//     Message newMessage= socialMediaService.updateMessageById(id,msg);
-//     ctx.json(newMessage);
-//     ctx.status(200);
-
-// }
-
-// private void UserFeed(Context ctx){
-//     int id = Integer.parseInt(ctx.pathParam("account_id"));
-//     List<Message> messages = socialMediaService.getUserFeed(id);
-//     ctx.json(messages);
-//     ctx.status(200);
-
-// }

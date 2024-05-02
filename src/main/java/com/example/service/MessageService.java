@@ -30,11 +30,9 @@ public class MessageService {
         messageRepository.deleteById(id);
     }
 
-    public Message updateMessage(int id,Message newMessage){
+    public Message updateMessage(int id,String newMessageText){
         Message currentMessage = messageRepository.findById(id).orElseThrow();
-        currentMessage.setPostedBy(newMessage.getPostedBy());
-        currentMessage.setMessageText(newMessage.getMessageText());
-        currentMessage.setTimePostedEpoch(newMessage.getTimePostedEpoch());
+        currentMessage.setMessageText(newMessageText);
         messageRepository.save(currentMessage);
         Message updatedMessage =  messageRepository.findById(id).orElseThrow();
         return updatedMessage;

@@ -29,5 +29,9 @@ public class AccountService {
         return accountRepository.getById(userId);
     }
 
+    public Account getUserbyUsername(String username){
+        return accountRepository.findByUsername( username);
+    }
+
 
 }
