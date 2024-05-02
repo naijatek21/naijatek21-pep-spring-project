@@ -1,5 +1,10 @@
 package com.example.controller;
 
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller using Spring. The endpoints you will need can be
@@ -7,15 +12,33 @@ package com.example.controller;
  * where applicable as well as the @ResponseBody and @PathVariable annotations. You should
  * refer to prior mini-project labs and lecture materials for guidance on how a controller may be built.
  */
+@Controller
 public class SocialMediaController {
 
+    @PostMapping("/register")
+    public void addNewUser(){}
+
+    @PostMapping("/login")
+    public void logger(){}
+
+    @PostMapping("messages")
+    public void messageGenerator(){}
+
+    @GetMapping("/messages")
+    public void messageFeed(){}
+
+    @GetMapping("/messages/{message_id}")
+    public void messageRetrieve(){}
+
+    @DeleteMapping("/messages/{message_id}")
+    public void messageDelete(){}
+
+    @PatchMapping("/messages/{message_id}")
+    public void messageUpdate(){}
+
+    @GetMapping("/accounts/{account_id}")
+    public void userFeed(){}
 }
-
-
-
-
-
-
 
 // public Javalin startAPI() {
 //     Javalin app = Javalin.create();
