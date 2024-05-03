@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityNotFoundException;
 
 import org.h2.util.IntArray;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.entity.Account;
 import com.example.entity.Message;
+import com.example.repository.AccountRepository;
+import com.example.repository.MessageRepository;
 import com.example.service.AccountService;
 import com.example.service.MessageService;
 
@@ -30,8 +33,19 @@ import javafx.beans.binding.IntegerBinding;
  */
 @Controller
 public class SocialMediaController {
-    private AccountService accountService;
+    // @Autowired
+    // private AccountRepository accountRepository;
+    // @Autowired
+    // private MessageRepository messageRepository;
+    @Autowired
     private MessageService messageService;
+    @Autowired
+    private AccountService accountService;
+
+    // public SocialMediaController(AccountService accountService,MessageService messageService){
+    //     this.accountService = new AccountService(accountRepository);
+    //     this.messageService = new MessageService(messageRepository);
+    // }
 
     @PostMapping("/register")
     public @ResponseBody ResponseEntity<Account> addNewUser(@RequestParam String username,@RequestParam String password){

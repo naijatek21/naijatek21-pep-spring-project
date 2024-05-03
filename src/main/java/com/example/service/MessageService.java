@@ -10,8 +10,9 @@ import com.example.repository.MessageRepository;
 
 @Service
 public class MessageService {
-    private MessageRepository messageRepository;
     @Autowired
+    private MessageRepository messageRepository;
+
     public MessageService(MessageRepository messageRepository){
         this.messageRepository = messageRepository;
     }
@@ -39,7 +40,7 @@ public class MessageService {
     }
 
     public List<Message> getAllMessagesbyUser(int userId) {
-        return messageRepository.findAllByPostedby(userId);
+        return messageRepository.findAllByPostedBy(userId);
     }
 
 
