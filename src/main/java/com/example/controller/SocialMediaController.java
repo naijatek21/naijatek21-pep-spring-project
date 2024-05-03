@@ -1,7 +1,7 @@
 package com.example.controller;
 
 import java.util.List;
-
+import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 
 import org.h2.util.IntArray;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -48,27 +49,28 @@ public class SocialMediaController {
     // }
 
     @PostMapping("/register")
-    public @ResponseBody ResponseEntity<Account> addNewUser(@RequestParam String username,@RequestParam String password){
-        if(username.length() !=0 || password.length() >= 4){
-            try{
+    public  ResponseEntity<?> addNewUser(@RequestBody Account accnt){
+        String username = accnt.getUsername();
+        String password = accnt.getPassword();
+        if(!username.isBlank() && password.length() >= 4){
                 Account attempt = accountService.getUserbyUsername(username);
-                return ResponseEntity.status(409).body(null);
-
-            }catch(Exception e){
-                Account newAccount = accountService.newUser(username,password);
-                return ResponseEntity.status(200).body(newAccount);
+                if(attempt != null)
+                    return ResponseEntity.status(409).body(null);
+                else{
+                    Account newAccount = accountService.newUserAccount(accnt);
+                    return ResponseEntity.status(200).body(newAccount);
+                }
             }
-        }
         else{
             return ResponseEntity.status(400).body(null);
         }
     }
 
     @PostMapping("/login")
-    public  @ResponseBody ResponseEntity<Account> logger(@RequestParam String username,@RequestParam String password){
+    public  @ResponseBody ResponseEntity<?> logger(@RequestBody Account account ){
         
         try{
-            Account attempt = accountService.loginAccount(username,password);
+            Account attempt = accountService.loginAccount(account);
             return ResponseEntity.status(200).body(attempt);
         }
         catch (EntityNotFoundException e) {
@@ -129,10 +131,10 @@ public class SocialMediaController {
     }
 
     @PatchMapping("/messages/{message_id}")
-    public @ResponseBody ResponseEntity<Integer> messageUpdate(@PathVariable int message_id,@RequestParam String newMessageText ){
-        if(newMessageText.length() >0 && newMessageText.length() <= 255){
+    public @ResponseBody ResponseEntity<?> messageUpdate(@PathVariable int message_id,@RequestBody Message newMessageText ){
+        if(newMessageText.getMessageText().length() >0 && newMessageText.getMessageText().length() <= 255){
             try{
-                Message m = messageService.updateMessage(message_id, newMessageText);
+                Message m = messageService.updateMessage(message_id, newMessageText.getMessageText());
                 return ResponseEntity.status(200).body(1);
             }catch(Exception e){
                 return ResponseEntity.status(400).body(null);

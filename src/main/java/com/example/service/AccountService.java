@@ -1,5 +1,7 @@
 package com.example.service;
 
+import javax.security.auth.login.AccountNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,24 +16,22 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
-    public Account newUser(String username, String password){
-        Account user  = new Account(username, password);
-        accountRepository.save(user);
-        return user;
+
+    public Account newUserAccount(Account account){
+        accountRepository.save(account);
+        return accountRepository.findByUsername(account.getUsername());
+    }
+    public Account getUserbyId(int userId){
+        return accountRepository.findById(userId).orElseThrow(() -> new RuntimeException("Message not found with id " + userId));
     }
 
-
-    public Account loginAccount(String username, String password){
-        Account a = accountRepository.findByUsernameAndPassword(username, password);
+    public Account loginAccount(Account account){
+        Account a = accountRepository.findByUsernameAndPassword(account.getUsername(), account.getPassword());
         return a;
     }
 
-    public Account getUserbyId(int userId){
-        return accountRepository.getById(userId);
-    }
-
     public Account getUserbyUsername(String username){
-        return accountRepository.findByUsername( username);
+        return accountRepository.findByUsername(username);
     }
 
 
