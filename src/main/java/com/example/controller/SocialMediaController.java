@@ -25,6 +25,7 @@ import com.example.service.AccountService;
 import com.example.service.MessageService;
 
 import javafx.beans.binding.IntegerBinding;
+import javassist.bytecode.StackMapTable.RuntimeCopyException;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller using Spring. The endpoints you will need can be
@@ -69,33 +70,31 @@ public class SocialMediaController {
     @PostMapping("/login")
     public  @ResponseBody ResponseEntity<?> logger(@RequestBody Account account ){
         
-        try{
             Account attempt = accountService.loginAccount(account);
-            return ResponseEntity.status(200).body(attempt);
-        }
-        catch (EntityNotFoundException e) {
-            // TODO: handle exception
-            return ResponseEntity.status(401).body(null);
-        }
+            if(attempt !=null)
+                return ResponseEntity.status(200).body(attempt);
+            else
+                return ResponseEntity.status(401).body(null);
+        
         
 
 
     }
 
     @PostMapping("messages")
-    public  @ResponseBody ResponseEntity<Message> messageGenerator(@RequestParam int postedBy, @RequestParam String messageText,  @RequestParam long timePostedEpoch){
+    public  @ResponseBody ResponseEntity<?> messageGenerator(@RequestBody Message msg){
         try{
-            Account poster = accountService.getUserbyId(postedBy);
-            if(messageText.length()>0 && messageText.length() <= 255){
-                Message msg = new Message(postedBy,messageText,timePostedEpoch);
-                messageService.addMessage(msg);
-                return ResponseEntity.status(200).body(msg);
+            Account poster = accountService.getUserbyId(msg.getPostedBy());
+            if(msg.getMessageText().length()>0 && msg.getMessageText().length() <= 255 && poster != null){
+                Message nMessage = new Message(msg.getPostedBy(),msg.getMessageText(),msg.getTimePostedEpoch());
+                messageService.addMessage(nMessage);
+                return ResponseEntity.status(200).body(nMessage);
             }
             else{
                 return ResponseEntity.status(400).body(null);
             }
         }
-        catch(EntityNotFoundException e){
+        catch(RuntimeException e){
             return ResponseEntity.status(400).body(null);
         }
     }
@@ -148,9 +147,17 @@ public class SocialMediaController {
     }
 
     @GetMapping("/accounts/{account_id}")
-    public @ResponseBody ResponseEntity<List<Message>> userFeed(@PathVariable int account_id){
-        List<Message> msgs = messageService.getAllMessagesbyUser(account_id);
-        return ResponseEntity.status(200).body(msgs);
+    public @ResponseBody ResponseEntity<?> userFeed(@PathVariable int account_id){
+        try{
+            Account account = accountService.getUserbyId(account_id);
+            List<Message> msgs = messageService.getAllMessagesbyUser(account_id);
+            return ResponseEntity.status(200).body(msgs);
+        }
+        catch(RuntimeException e){
+            return ResponseEntity.status(200).body(null);
+
+
+        }
     }
 }
 
