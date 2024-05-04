@@ -147,18 +147,18 @@ public class SocialMediaController {
     }
 
     @GetMapping("/accounts/{account_id}")
-    public @ResponseBody ResponseEntity<List<Message>> userFeed(@PathVariable int account_id){
-        try{
+    public @ResponseBody ResponseEntity<?> userFeed(@PathVariable int account_id){
+            try{
             Account account = accountService.getUserbyId(account_id);
             List<Message> msgs = messageService.getAllMessagesbyUser(account_id);
-            return ResponseEntity.status(200).body(msgs);
-        }
-        catch(RuntimeException e){
-            return ResponseEntity.status(200).body(null);
+            return ResponseEntity.status(200).body(msgs);}
+        
+            catch(RuntimeException e){              
+                return ResponseEntity.status(200).body(null);}
 
 
-        }
     }
 }
+
 
 

@@ -22,7 +22,7 @@ public class AccountService {
         return accountRepository.findByUsername(account.getUsername());
     }
     public Account getUserbyId(int userId){
-        return accountRepository.findById(userId).orElseThrow(() -> new RuntimeException("Message not found with id " + userId));
+        return accountRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found with id " + userId));
     }
 
     public Account loginAccount(Account account){
