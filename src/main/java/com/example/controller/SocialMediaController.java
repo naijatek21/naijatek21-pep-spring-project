@@ -147,7 +147,7 @@ public class SocialMediaController {
     }
 
     @GetMapping("/accounts/{account_id}")
-    public @ResponseBody ResponseEntity<?> userFeed(@PathVariable int account_id){
+    public @ResponseBody ResponseEntity<List<Message>> userFeed(@PathVariable int account_id){
         try{
             Account account = accountService.getUserbyId(account_id);
             List<Message> msgs = messageService.getAllMessagesbyUser(account_id);

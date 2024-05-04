@@ -40,7 +40,7 @@ public class MessageService {
     }
 
     public List<Message> getAllMessagesbyUser(int userId) {
-        return messageRepository.findAllByPostedBy(userId);
+        return messageRepository.findAllByUser(userId);
     }
 
 
